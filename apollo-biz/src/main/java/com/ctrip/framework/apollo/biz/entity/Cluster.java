@@ -18,12 +18,21 @@ import javax.persistence.Table;
 @Where(clause = "isDeleted = 0")
 public class Cluster extends BaseEntity implements Comparable<Cluster> {
 
+  /***
+   * 名字
+   */
   @Column(name = "Name", nullable = false)
   private String name;
 
+  /***
+   * App 编号
+   */
   @Column(name = "AppId", nullable = false)
   private String appId;
 
+  /***
+   * 父 App 编号 用于灰度发布
+   */
   @Column(name = "ParentClusterId", nullable = false)
   private long parentClusterId;
 

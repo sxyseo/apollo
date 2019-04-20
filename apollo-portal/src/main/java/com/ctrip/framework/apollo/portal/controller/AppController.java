@@ -97,22 +97,27 @@ public class AppController {
     return appService.findByAppIds(appIds, page);
   }
 
+  /***
+   * 创建 App
+   * @param appModel
+   * @return
+   */
   @PostMapping
   public App create(@Valid @RequestBody AppModel appModel) {
-
+    // 将 AppModel 转换成 App 对象
     App app = transformToApp(appModel);
-
+    // 保存 App 对象到数据库
     App createdApp = appService.createAppInLocal(app);
-
+    // 发布 AppCreationEvent 创建事件
     publisher.publishEvent(new AppCreationEvent(createdApp));
-
+    // 授予 App 管理员的角色
     Set<String> admins = appModel.getAdmins();
     if (!CollectionUtils.isEmpty(admins)) {
       rolePermissionService
           .assignRoleToUsers(RoleUtils.buildAppMasterRoleName(createdApp.getAppId()),
               admins, userInfoHolder.getUser().getUserId());
     }
-
+    // 返回 App 对象
     return createdApp;
   }
 
@@ -195,6 +200,11 @@ public class AppController {
 
   }
 
+  /***
+   * 将 AppModel 转换成 App 对象
+   * @param appModel
+   * @return
+   */
   private App transformToApp(AppModel appModel) {
     String appId = appModel.getAppId();
     String appName = appModel.getName();

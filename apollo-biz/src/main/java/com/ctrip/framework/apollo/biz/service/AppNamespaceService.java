@@ -105,18 +105,23 @@ public class AppNamespaceService {
 
   @Transactional
   public AppNamespace createAppNamespace(AppNamespace appNamespace) {
+    // 判断 `name` 在 App 下是否已经存在对应的 AppNamespace 对象。若已经存在，抛出 ServiceException 异常。
     String createBy = appNamespace.getDataChangeCreatedBy();
     if (!isAppNamespaceNameUnique(appNamespace.getAppId(), appNamespace.getName())) {
       throw new ServiceException("appnamespace not unique");
     }
-    appNamespace.setId(0);//protection
+    // 保护代码，避免 App 对象中，已经有 id 属性。protection
+    appNamespace.setId(0);
     appNamespace.setDataChangeCreatedBy(createBy);
     appNamespace.setDataChangeLastModifiedBy(createBy);
 
+    // 保存 AppNamespace 到数据库
     appNamespace = appNamespaceRepository.save(appNamespace);
 
+    // 创建 AppNamespace 在 App 下，每个 Cluster 的 Namespace 对象。
     createNamespaceForAppNamespaceInAllCluster(appNamespace.getAppId(), appNamespace.getName(), createBy);
 
+    // 记录 Audit 到数据库中
     auditService.audit(AppNamespace.class.getSimpleName(), appNamespace.getId(), Audit.OP.INSERT, createBy);
     return appNamespace;
   }

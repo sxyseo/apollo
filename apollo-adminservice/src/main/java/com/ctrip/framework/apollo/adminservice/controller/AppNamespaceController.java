@@ -38,10 +38,13 @@ public class AppNamespaceController {
   public AppNamespaceDTO create(@RequestBody AppNamespaceDTO appNamespace,
                                 @RequestParam(defaultValue = "false") boolean silentCreation) {
 
+    // 将 AppNamespaceDTO 转换成 AppNamespace 对象
     AppNamespace entity = BeanUtils.transform(AppNamespace.class, appNamespace);
+    // 判断 `name` 在 App 下是否已经存在对应的 AppNamespace 对象。若已经存在，抛出 BadRequestException 异常。
     AppNamespace managedEntity = appNamespaceService.findOne(entity.getAppId(), entity.getName());
 
     if (managedEntity == null) {
+      // 设置 AppNamespace 的 format 属性为 "properties"，若为 null 。
       if (StringUtils.isEmpty(entity.getFormat())){
         entity.setFormat(ConfigFileFormat.Properties.getValue());
       }
@@ -56,6 +59,7 @@ public class AppNamespaceController {
       throw new BadRequestException("app namespaces already exist.");
     }
 
+    // 将保存的 AppNamespace 对象，转换成 AppNamespaceDTO 返回
     return BeanUtils.transform(AppNamespaceDTO.class, entity);
   }
 
